@@ -37,6 +37,10 @@ class HUDView: UIView {
         static let labelMarginTop: CGFloat = 15.0
     }
 
+    var background: UIColor {
+        return UIColor(dynamicColor: fluentTheme.aliasTokens.backgroundColors[.backgroundInverted])
+    }
+
     var onTap: (() -> Void)? {
         didSet {
             if onTap != nil {
@@ -74,7 +78,7 @@ class HUDView: UIView {
         super.init(frame: .zero)
 
         isUserInteractionEnabled = false
-        backgroundColor = Colors.HUD.background
+        backgroundColor = background
         layer.cornerRadius = Constants.backgroundCornerRadius
         layer.masksToBounds = true
         layer.cornerCurve = .continuous
