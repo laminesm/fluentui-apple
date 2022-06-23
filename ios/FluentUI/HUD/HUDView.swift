@@ -192,16 +192,16 @@ class HUDView: UIView {
         switch type {
         case .activity:
             let activityIndicator = MSFActivityIndicator(size: .xLarge)
-            activityIndicator.state.color = Colors.HUD.activityIndicator
+            activityIndicator.state.color = UIColor(dynamicColor: activityIndicator.fluentTheme.aliasTokens.strokeColors[.strokeAccessible])
             activityIndicator.state.isAnimating = true
             return activityIndicator
         case .success:
             let imageView = UIImageView(image: .staticImageNamed("checkmark-36x36"))
-            imageView.tintColor = Colors.HUD.activityIndicator
+            imageView.tintColor = UIColor(dynamicColor: imageView.fluentTheme.aliasTokens.strokeColors[.strokeAccessible])
             return imageView
         case .failure:
             let imageView = UIImageView(image: .staticImageNamed("dismiss-36x36"))
-            imageView.tintColor = Colors.HUD.activityIndicator
+            imageView.tintColor = UIColor(dynamicColor: imageView.fluentTheme.aliasTokens.strokeColors[.strokeAccessible])
             return imageView
         case .custom(let image):
             return UIImageView(image: image)
