@@ -59,7 +59,7 @@ class HUDView: UIView {
 
     let label: Label = {
         let label = Label()
-        label.textColor = Colors.HUD.text
+        label.textColor = UIColor(dynamicColor: label.fluentTheme.aliasTokens.foregroundColors[.foregroundInverted1])
         label.numberOfLines = 2
         label.textAlignment = .center
         return label
