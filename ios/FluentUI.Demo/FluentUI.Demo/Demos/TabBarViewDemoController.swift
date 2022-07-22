@@ -10,8 +10,8 @@ class TabBarViewDemoController: DemoController {
     private enum Constants {
         static let initialBadgeNumbers: [UInt] = [5, 50, 250]
         static let initialHigherBadgeNumbers: [UInt] = [1250, 25505, 3050528]
-        static let switchSettingTextWidth: CGFloat = 200
-        static let buttonSettingTextWidth: CGFloat = 170
+        static let switchSettingTextWidth: CGFloat = 180
+        static let buttonSettingTextWidth: CGFloat = 150
     }
 
     private var tabBarView: TabBarView?
@@ -24,30 +24,12 @@ class TabBarViewDemoController: DemoController {
     private let showBadgeNumbersSwitch = UISwitch()
     private let useHigherBadgeNumbersSwitch = UISwitch()
 
-    private lazy var incrementBadgeButton: MSFButton = {
-        let button = MSFButton(style: .secondary, size: .small, action: { [weak self] _ in
-            guard let strongSelf = self else {
-                return
-            }
-
-            strongSelf.incrementBadgeNumbers()
-        })
-        button.state.text = "+"
-
-        return button
+    private lazy var incrementBadgeButton: Button = {
+        return createButton(title: "+", action: #selector(incrementBadgeNumbers))
     }()
 
-    private lazy var decrementBadgeButton: MSFButton = {
-        let button = MSFButton(style: .secondary, size: .small, action: { [weak self] _ in
-            guard let strongSelf = self else {
-                return
-            }
-
-            strongSelf.decrementBadgeNumbers()
-        })
-        button.state.text = "-"
-
-        return button
+    private lazy var decrementBadgeButton: Button = {
+        return createButton(title: "-", action: #selector(decrementBadgeNumbers))
     }()
 
     private lazy var homeItem: TabBarItem = homeItem(shouldShowTitle: false)
@@ -58,19 +40,7 @@ class TabBarViewDemoController: DemoController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        container.addArrangedSubview(createButton(title: "Show tooltip for Home button", action: { [weak self] _ in
-            guard let strongSelf = self,
-                  let tabBarView = strongSelf.tabBarView,
-                  let view = tabBarView.itemView(with: strongSelf.homeItem) else {
-                return
-            }
-
-            Tooltip.shared.show(with: "Tap anywhere to dismiss this tooltip",
-                                for: view,
-                                preferredArrowDirection: .down,
-                                offset: .init(x: 0, y: 6),
-                                dismissOn: .tapAnywhere)
-        }))
+        container.addArrangedSubview(createButton(title: "Show tooltip for Home button", action: #selector(showTooltipForHomeButton)))
 
         container.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
 
@@ -83,9 +53,7 @@ class TabBarViewDemoController: DemoController {
         addRow(text: "Use higher badge numbers", items: [useHigherBadgeNumbersSwitch], textWidth: Constants.switchSettingTextWidth)
         useHigherBadgeNumbersSwitch.addTarget(self, action: #selector(handleOnSwitchValueChanged), for: .valueChanged)
 
-        let buttonsStackView = UIStackView(arrangedSubviews: [incrementBadgeButton, decrementBadgeButton])
-        buttonsStackView.spacing = 20
-        addRow(text: "Modify badge numbers", items: [buttonsStackView], textWidth: Constants.buttonSettingTextWidth)
+        addRow(text: "Modify badge numbers", items: [incrementBadgeButton, decrementBadgeButton], textWidth: Constants.buttonSettingTextWidth)
 
         setupTabBarView()
         updateBadgeButtons()
@@ -108,7 +76,7 @@ class TabBarViewDemoController: DemoController {
             updatedTabBarView.items = [
                 homeItem,
                 TabBarItem(title: "New", image: UIImage(named: "New_24")!, selectedImage: UIImage(named: "New_Selected_24")!),
-                TabBarItem(title: "Open", image: UIImage(named: "Open_24")!, selectedImage: UIImage(named: "Open_Selected_24")!)
+              TabBarItem(title: "Open", image: UIImage(named: "Open_24")!, selectedImage: UIImage(named: "Open_Selected_24")!)
             ]
         } else {
             homeItem = homeItem(shouldShowTitle: false)
@@ -159,8 +127,8 @@ class TabBarViewDemoController: DemoController {
     }
 
     private func updateBadgeButtons() {
-        incrementBadgeButton.state.isDisabled = !showBadgeNumbers
-        decrementBadgeButton.state.isDisabled = !showBadgeNumbers
+        incrementBadgeButton.isEnabled = showBadgeNumbers
+        decrementBadgeButton.isEnabled = showBadgeNumbers
     }
 
     private func modifyBadgeNumbers(increment: Int) {
@@ -194,6 +162,18 @@ class TabBarViewDemoController: DemoController {
     @objc private func decrementBadgeNumbers() {
         modifyBadgeNumbers(increment: -1)
     }
+
+    @objc private func showTooltipForHomeButton() {
+        guard let tabBarView = tabBarView, let view = tabBarView.itemView(with: homeItem) else {
+            return
+        }
+
+        Tooltip.shared.show(with: "Tap anywhere to dismiss this tooltip",
+                            for: view,
+                            preferredArrowDirection: .down,
+                            offset: .init(x: 0, y: 6),
+                            dismissOn: .tapAnywhere)
+    }
 }
 
 // MARK: - TabBarViewDemoController: TabBarViewDelegate
@@ -204,58 +184,5 @@ extension TabBarViewDemoController: TabBarViewDelegate {
         let action = UIAlertAction(title: "OK", style: .default)
         alert.addAction(action)
         present(alert, animated: true)
-    }
-}
-
-// MARK: - TabBarViewDemoController: DemoAppearanceDelegate
-extension TabBarViewDemoController: DemoAppearanceDelegate {
-    func themeWideOverrideDidChange(isOverrideEnabled: Bool) {
-        guard let fluentTheme = self.view.window?.fluentTheme else {
-            return
-        }
-
-        var tokensClosure: ((TabBarView) -> TabBarTokens)?
-        if isOverrideEnabled {
-            tokensClosure = { _ in
-                return ThemeWideOverrideTabBarTokens()
-            }
-        }
-
-        fluentTheme.register(controlType: TabBarView.self, tokens: tokensClosure)
-    }
-
-    func perControlOverrideDidChange(isOverrideEnabled: Bool) {
-        let tokens = (isOverrideEnabled ? PerControlOverrideTabBarItemTokens() : nil)
-        _ = tabBarView?.overrideTokens(tokens)
-    }
-
-    func isThemeWideOverrideApplied() -> Bool {
-        return self.view.window?.fluentTheme.tokenOverride(for: TabBarView.self) != nil
-    }
-
-    // MARK: - Custom tokens
-    private class ThemeWideOverrideTabBarTokens: TabBarTokens {
-        override var tabBarItemSelectedColor: DynamicColor {
-            return .init(light: globalTokens.sharedColors[.burgundy][.tint10],
-                         lightHighContrast: globalTokens.sharedColors[.pumpkin][.tint10],
-                         dark: globalTokens.sharedColors[.darkTeal][.tint40],
-                         darkHighContrast: globalTokens.sharedColors[.teal][.tint40])
-        }
-        override var tabBarItemUnselectedColor: DynamicColor {
-            return .init(light: globalTokens.sharedColors[.darkTeal][.tint20],
-                         lightHighContrast: globalTokens.sharedColors[.teal][.tint40],
-                         dark: globalTokens.sharedColors[.pumpkin][.tint40],
-                         darkHighContrast: globalTokens.sharedColors[.burgundy][.tint40])
-        }
-    }
-
-    private class PerControlOverrideTabBarItemTokens: TabBarTokens {
-        override var tabBarItemTitleLabelFontPortrait: FontInfo? {
-            return .init(size: 15, weight: .bold)
-        }
-
-        override var tabBarItemTitleLabelFontLandscape: FontInfo? {
-            return .init(size: 15, weight: .bold)
-        }
     }
 }

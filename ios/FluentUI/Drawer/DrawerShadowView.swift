@@ -6,6 +6,11 @@
 import UIKit
 
 class DrawerShadowView: UIView {
+    private struct Constants {
+        static let shadowRadius: CGFloat = 4
+        static let shadowOffset: CGFloat = 2
+        static let shadowOpacity: Float = 0.05
+    }
 
     static func shadowOffsetForPresentedView(with presentationDirection: DrawerPresentationDirection, offset: CGFloat) -> UIEdgeInsets {
         var margins: UIEdgeInsets = .zero
@@ -40,27 +45,13 @@ class DrawerShadowView: UIView {
 
     private var animationDuration: TimeInterval = 0
 
-    private var shadowDirection: DrawerPresentationDirection?
-
-    private var drawerTokens: DrawerTokens
-
-    private var shadow1 = CALayer()
-
-    private var shadow2 = CALayer()
-
-    init(shadowDirection: DrawerPresentationDirection?, tokens: DrawerTokens) {
-        self.drawerTokens = tokens
+    init(shadowDirection: DrawerPresentationDirection?) {
         super.init(frame: .zero)
-        self.shadowDirection = shadowDirection
-        updateApperance()
+        layer.shadowRadius = Constants.shadowRadius
+        layer.shadowOffset = shadowOffset(for: shadowDirection)
+        layer.shadowOpacity = Constants.shadowOpacity
         isAccessibilityElement = false
         isUserInteractionEnabled = false
-        if let direction = shadowDirection, direction.isHorizontal {
-            layer.insertSublayer(shadow2, at: 0)
-            layer.insertSublayer(shadow1, below: shadow2)
-        } else {
-            layer.insertSublayer(shadow1, at: 0)
-        }
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -77,23 +68,6 @@ class DrawerShadowView: UIView {
         animationDuration = 0
     }
 
-    func updateApperance() {
-        guard let shadowDirection = shadowDirection else {
-            return
-        }
-        shadow1.shadowColor = UIColor(dynamicColor: drawerTokens.shadow.colorOne).cgColor
-        shadow1.shadowRadius = drawerTokens.shadow.blurOne
-        shadow1.shadowOpacity = 1 // delegate opacity to style sheet
-        shadow1.shadowOffset = shadowOffset(for: shadowDirection, isFirst: true)
-
-        if shadowDirection.isHorizontal {
-            shadow2.shadowColor = UIColor(dynamicColor: drawerTokens.shadow.colorTwo).cgColor
-            shadow2.shadowRadius = drawerTokens.shadow.blurTwo
-            shadow2.shadowOpacity = 1 // delegate opacity to style sheet
-            shadow2.shadowOffset = shadowOffset(for: shadowDirection)
-        }
-    }
-
     override func didMoveToSuperview() {
         super.didMoveToSuperview()
         updateFrame()
@@ -106,28 +80,25 @@ class DrawerShadowView: UIView {
                 return
             }
             if object as? CALayer == owner.layer && keyPath == #keyPath(CALayer.mask) {
-                updateShadowPath(shadow1)
-                updateShadowPath(shadow2)
+                updateShadowPath()
                 return
             }
         }
         super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
     }
 
-    private func shadowOffset(for shadowDirection: DrawerPresentationDirection?, isFirst: Bool = false) -> CGSize {
+    private func shadowOffset(for shadowDirection: DrawerPresentationDirection?) -> CGSize {
         var offset = CGSize.zero
         if let shadowDirection = shadowDirection {
             switch shadowDirection {
             case .down:
-                offset.height = drawerTokens.shadowOffset
+                offset.height = Constants.shadowOffset
             case .up:
-                offset.height = -drawerTokens.shadowOffset
+                offset.height = -Constants.shadowOffset
             case .fromLeading:
-                offset.width = isFirst ? drawerTokens.shadow.xOne : drawerTokens.shadow.xTwo
-                offset.height = isFirst ? drawerTokens.shadow.yOne : drawerTokens.shadow.yTwo
+                offset.width = Constants.shadowOffset
             case .fromTrailing:
-                offset.width = -1 * (isFirst ? drawerTokens.shadow.xOne : drawerTokens.shadow.xTwo)
-                offset.height = -1 * (isFirst ? drawerTokens.shadow.yOne : drawerTokens.shadow.yTwo)
+                offset.width = -Constants.shadowOffset
             }
         }
         return offset
@@ -139,34 +110,30 @@ class DrawerShadowView: UIView {
         } else {
             frame = .zero
         }
-        shadow1.frame = bounds
-        shadow2.frame = bounds
-        updateShadowPath(shadow1)
-        updateShadowPath(shadow2)
+        updateShadowPath()
     }
 
-    private func updateShadowPath(_ shadow: CALayer?) {
-        let shadowLayer = shadow ?? layer
-        let oldShadowPath = shadowLayer.shadowPath
+    private func updateShadowPath() {
+        let oldShadowPath = layer.shadowPath
 
         if let ownerLayer = owner?.layer {
             if let mask = ownerLayer.mask as? CAShapeLayer {
-                shadowLayer.shadowPath = mask.path
+                layer.shadowPath = mask.path
             } else {
-                shadowLayer.shadowPath = UIBezierPath(
+                layer.shadowPath = UIBezierPath(
                     roundedRect: ownerLayer.bounds,
                     byRoundingCorners: ownerLayer.roundedCorners,
                     cornerRadii: CGSize(width: ownerLayer.cornerRadius, height: ownerLayer.cornerRadius)
                 ).cgPath
             }
         } else {
-            shadowLayer.shadowPath = nil
+            layer.shadowPath = nil
         }
 
-        animateShadowPath(from: oldShadowPath, baseLayer: shadowLayer)
+        animateShadowPath(from: oldShadowPath)
     }
 
-    private func animateShadowPath(from oldShadowPath: CGPath?, baseLayer: CALayer) {
+    private func animateShadowPath(from oldShadowPath: CGPath?) {
         if animationDuration == 0 {
             return
         }
@@ -177,6 +144,6 @@ class DrawerShadowView: UIView {
         // To match default timing function used in UIView.animate
         animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
-        baseLayer.add(animation, forKey: animation.keyPath)
+        layer.add(animation, forKey: animation.keyPath)
     }
 }

@@ -107,7 +107,8 @@ class ColorDemoController: UIViewController {
         tableView.allowsSelection = false
         tableView.backgroundColor = Colors.tableBackground
 
-        let stackView = UIStackView(arrangedSubviews: [segmentedControl, divider, tableView])
+        let separator = Separator(style: .shadow, orientation: .horizontal)
+        let stackView = UIStackView(arrangedSubviews: [segmentedControl, separator, tableView])
         stackView.setCustomSpacing(8, after: segmentedControl)
         stackView.axis = .vertical
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -167,11 +168,10 @@ class ColorDemoController: UIViewController {
                 colorView.updateBackgroundColor()
             }
         }
-        segmentedControl.updateColors()
+        segmentedControl.updateWindowSpecificColors()
     }
 
     private let tableView = UITableView(frame: .zero, style: .grouped)
-    private let divider = MSFDivider()
 }
 
 // MARK: - ColorDemoController: UITableViewDelegate

@@ -56,7 +56,6 @@ final class AsyncImageDemoPersona: PersonaData {
 
 class PeoplePickerDemoController: DemoController {
     var peoplePickers: [PeoplePicker] = []
-    var dividers: [MSFDivider] = []
 
     private let asyncImageSwitch = UISwitch()
 
@@ -75,9 +74,7 @@ class PeoplePickerDemoController: DemoController {
             addDescription(text: variant.description)
             addPeoplePicker(for: variant)
             if index != PeoplePickerSampleData.variants.count - 1 {
-                let divider = MSFDivider()
-                dividers.append(divider)
-                container.addArrangedSubview(divider)
+                container.addArrangedSubview(Separator())
             }
         }
     }

@@ -8,15 +8,14 @@ import UIKit
 class CommandBarButtonGroupView: UIView {
     let buttons: [CommandBarButton]
 
-    init(buttons: [CommandBarButton], commandBarTokens: CommandBarTokens) {
+    init(buttons: [CommandBarButton]) {
         self.buttons = buttons
-        self.commandBarTokens = commandBarTokens
 
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
 
         clipsToBounds = true
-        layer.cornerRadius = commandBarTokens.groupBorderRadius
+        layer.cornerRadius = LayoutConstants.cornerRadius
         layer.cornerCurve = .continuous
 
         configureHierarchy()
@@ -32,7 +31,7 @@ class CommandBarButtonGroupView: UIView {
         let stackView = UIStackView(arrangedSubviews: buttons)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .horizontal
-        stackView.spacing = commandBarTokens.itemInterspace
+        stackView.spacing = LayoutConstants.buttonPadding
 
         return stackView
     }()
@@ -48,10 +47,13 @@ class CommandBarButtonGroupView: UIView {
     }
 
     private func applyInsets() {
-        buttons.first?.contentEdgeInsets.left += CommandBarButtonGroupView.leftRightBuffer
-        buttons.last?.contentEdgeInsets.right += CommandBarButtonGroupView.leftRightBuffer
+        buttons.first?.contentEdgeInsets.left += LayoutConstants.leftRightBuffer
+        buttons.last?.contentEdgeInsets.right += LayoutConstants.leftRightBuffer
     }
 
-    private var commandBarTokens: CommandBarTokens
-    private static let leftRightBuffer: CGFloat = 2.0
+    private struct LayoutConstants {
+        static let cornerRadius: CGFloat = 8.0
+        static let buttonPadding: CGFloat = 2.0
+        static let leftRightBuffer: CGFloat = 2.0
+    }
 }

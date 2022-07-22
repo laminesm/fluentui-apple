@@ -38,9 +38,12 @@ class DemoController: UIViewController {
 
     var allowsContentToScroll: Bool { return true }
 
-    func createButton(title: String, action: (( MSFButton) -> Void)?) -> MSFButton {
-        let button = MSFButton(style: .secondary, size: .small, action: action)
-        button.state.text = title
+    func createButton(title: String, action: Selector) -> Button {
+        let button = Button()
+        button.titleLabel?.textAlignment = .center
+        button.titleLabel?.numberOfLines = 0
+        button.setTitle(title, for: .normal)
+        button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
 
@@ -168,22 +171,13 @@ class DemoController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_fluent_settings_24_regular"),
                                                             style: .plain,
                                                             target: self,
-                                                            action: #selector(showAppearancePopover(_:)))
+                                                            action: #selector(showAppearancePopover))
     }
 
-    @objc func showAppearancePopover(_ sender: AnyObject, presenter: UIViewController) {
-        if let barButtonItem = sender as? UIBarButtonItem {
-            appearanceController.popoverPresentationController?.barButtonItem = barButtonItem
-        } else if let sourceView = sender as? UIView {
-            appearanceController.popoverPresentationController?.sourceView = sourceView
-            appearanceController.popoverPresentationController?.sourceRect = sourceView.bounds
-        }
+    @objc func showAppearancePopover(_ sender: UIBarButtonItem) {
+        appearanceController.popoverPresentationController?.barButtonItem = sender
         appearanceController.popoverPresentationController?.delegate = self
-        presenter.present(appearanceController, animated: true, completion: nil)
-    }
-
-    @objc func showAppearancePopover(_ sender: AnyObject) {
-        showAppearancePopover(sender, presenter: self)
+        self.present(appearanceController, animated: true, completion: nil)
     }
 
     private lazy var appearanceController: DemoAppearanceController = .init(delegate: self as? DemoAppearanceDelegate)
