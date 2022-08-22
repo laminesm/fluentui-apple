@@ -6,7 +6,7 @@
 import CoreGraphics
 
 /// Represents a two-part shadow as used by FluentUI.
-public struct ShadowInfo: Equatable {
+public struct ShadowInfo {
     /// Initializes a shadow struct to be used in Fluent.
     ///
     /// - Parameters:

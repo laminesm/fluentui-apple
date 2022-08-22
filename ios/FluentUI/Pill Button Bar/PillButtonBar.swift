@@ -78,6 +78,48 @@ open class PillButtonBar: UIScrollView, TokenizedControlInternal {
         }
     }
 
+    private var buttonExtraSidePadding: CGFloat = 0.0
+
+    private var buttons = [PillButton]()
+
+    private var lastKnownScrollFrameWidth: CGFloat = 0.0
+
+    private var needsButtonSizeReconfiguration: Bool = false
+
+    private var selectedButton: PillButton? {
+        willSet {
+            selectedButton?.isSelected = false
+        }
+
+        didSet {
+            if let button = selectedButton {
+                button.isSelected = true
+            }
+        }
+    }
+
+    private var stackView: UIStackView = {
+        let view = UIStackView()
+        view.distribution = .fillProportionally
+        view.alignment = .center
+        view.spacing = Constants.minButtonsSpacing
+        return view
+    }()
+
+    private var customPillButtonBackgroundColor: UIColor?
+    private var customSelectedPillButtonBackgroundColor: UIColor?
+    private var customPillButtonTextColor: UIColor?
+    private var customSelectedPillButtonTextColor: UIColor?
+    private var customPillButtonUnreadDotColor: UIColor?
+
+    private var leadingConstraint: NSLayoutConstraint?
+
+    private var centerConstraint: NSLayoutConstraint?
+
+    private var heightConstraint: NSLayoutConstraint?
+
+    private var trailingConstraint: NSLayoutConstraint?
+
     public override var bounds: CGRect {
         didSet {
             if bounds.width > 0, lastKnownScrollFrameWidth > 0, bounds.width != lastKnownScrollFrameWidth {
@@ -336,8 +378,15 @@ open class PillButtonBar: UIScrollView, TokenizedControlInternal {
         buttonExtraSidePadding = ceil(totalPadding / CGFloat(buttonEdges))
         for button in buttons {
             button.layoutIfNeeded()
-            button.contentEdgeInsets.right += buttonExtraSidePadding
-            button.contentEdgeInsets.left += buttonExtraSidePadding
+
+            if #available(iOS 15.0, *) {
+                button.configuration?.contentInsets.leading += buttonExtraSidePadding
+                button.configuration?.contentInsets.trailing += buttonExtraSidePadding
+            } else {
+                button.contentEdgeInsets.right += buttonExtraSidePadding
+                button.contentEdgeInsets.left += buttonExtraSidePadding
+            }
+
             button.layoutIfNeeded()
         }
     }
@@ -376,10 +425,18 @@ open class PillButtonBar: UIScrollView, TokenizedControlInternal {
         for button in buttons {
             button.layoutIfNeeded()
             let buttonWidth = button.frame.width
+
             if buttonWidth > 0, buttonWidth < tokenSet[.minButtonWidth].float {
                 let extraInset = floor((tokenSet[.minButtonWidth].float - button.frame.width) / 2)
-                button.contentEdgeInsets.left += extraInset
-                button.contentEdgeInsets.right = button.contentEdgeInsets.left
+
+                if #available(iOS 15.0, *) {
+                    button.configuration?.contentInsets.leading += extraInset
+                    button.configuration?.contentInsets.trailing = button.configuration?.contentInsets.leading ?? extraInset
+                } else {
+                    button.contentEdgeInsets.left += extraInset
+                    button.contentEdgeInsets.right = button.contentEdgeInsets.left
+                }
+
                 button.layoutIfNeeded()
             }
         }
