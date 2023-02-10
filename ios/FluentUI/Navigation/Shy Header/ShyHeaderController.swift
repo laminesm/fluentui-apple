@@ -101,6 +101,11 @@ class ShyHeaderController: UIViewController {
         accessoryViewObservation = contentViewController.navigationItem.observe(\UINavigationItem.accessoryView) { [weak self] item, _ in
             self?.shyHeaderView.accessoryView = item.accessoryView
         }
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(themeDidChange),
+                                               name: .didChangeTheme,
+                                               object: nil)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -123,8 +128,8 @@ class ShyHeaderController: UIViewController {
         setupNotificationObservers()
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         updateNavigationBarStyle()
     }
 
@@ -256,6 +261,13 @@ class ShyHeaderController: UIViewController {
         }
 
         return true
+    }
+
+    @objc private func themeDidChange(_ notification: Notification) {
+        guard let themeView = notification.object as? UIView, self.view.isDescendant(of: themeView) else {
+            return
+        }
+        updateNavigationBarStyle()
     }
 
     private func updateBackgroundColor(with item: UINavigationItem) {
