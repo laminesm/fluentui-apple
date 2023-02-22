@@ -126,7 +126,7 @@ class ShyHeaderController: UIViewController {
 
         updatePadding()
         setupNotificationObservers()
-        updateNavigationBarStyle(theme: self.msfNavigationController?.msfNavigationBar.fluentTheme ?? .shared)
+        updateNavigationBarStyle()
     }
 
     // MARK: - Base Construction
@@ -216,7 +216,7 @@ class ShyHeaderController: UIViewController {
             self?.shyHeaderView.navigationBarIsHidden = navigationBar.frame.maxY == 0
         }
         navigationBarStyleObservation = msfNavigationController?.msfNavigationBar.observe(\.style) { [weak self] _, _ in
-            self?.updateNavigationBarStyle(theme: self?.msfNavigationController?.msfNavigationBar.fluentTheme ?? .shared)
+            self?.updateNavigationBarStyle()
         }
         navigationBarHeightObservation = msfNavigationController?.msfNavigationBar.observe(\.barHeight) { [weak self] _, _ in
             self?.updatePadding()
@@ -259,8 +259,8 @@ class ShyHeaderController: UIViewController {
         return true
     }
 
-    public func updateBackgroundColor(with item: UINavigationItem, theme: FluentTheme = .shared) {
-        let color = item.navigationBarColor(fluentTheme: theme)
+    private func updateBackgroundColor(with item: UINavigationItem) {
+        let color = item.navigationBarColor(fluentTheme: containingView?.fluentTheme ?? view.fluentTheme)
         shyHeaderView.backgroundColor = color
         view.backgroundColor = color
         paddingView.backgroundColor = color
@@ -523,10 +523,10 @@ class ShyHeaderController: UIViewController {
     }
 
     /// Updates based on the current navigation bar style.
-    private func updateNavigationBarStyle(theme: FluentTheme) {
+    private func updateNavigationBarStyle() {
         if let (actualStyle, actualItem) = msfNavigationController?.msfNavigationBar.actualStyleAndItem(for: navigationItem) {
             shyHeaderView.navigationBarStyle = actualStyle
-            updateBackgroundColor(with: actualItem, theme: theme)
+            updateBackgroundColor(with: actualItem)
         }
     }
 
