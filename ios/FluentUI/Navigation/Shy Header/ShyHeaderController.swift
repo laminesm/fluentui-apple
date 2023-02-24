@@ -137,7 +137,9 @@ class ShyHeaderController: UIViewController {
 
         updatePadding()
         setupNotificationObservers()
-        updateNavigationBarStyle(theme: msfNavigationController?.msfNavigationBar.tokenSet.fluentTheme ?? containingView?.fluentTheme ?? view.fluentTheme)
+        if let theme: FluentTheme = msfNavigationController?.msfNavigationBar.tokenSet.fluentTheme {
+            updateNavigationBarStyle(theme: theme)
+        }
     }
 
     // MARK: - Base Construction
