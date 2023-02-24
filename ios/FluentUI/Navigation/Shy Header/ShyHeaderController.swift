@@ -81,6 +81,11 @@ class ShyHeaderController: UIViewController {
             self?.updatePadding()
         }
 
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(themeDidChange),
+                                               name: .didChangeTheme,
+                                               object: nil)
+
         loadViewIfNeeded()
         addChild(contentViewController)
         contentContainerView.addSubview(contentViewController.view)
@@ -107,6 +112,13 @@ class ShyHeaderController: UIViewController {
         }
     }
 
+    @objc private func themeDidChange(_ notification: Notification) {
+        guard let themeView = notification.object as? UIView, ((containingView?.isDescendant(of: themeView)) != nil) else {
+            return
+        }
+        //updateNavigationBarStyle(theme: containingView?.fluentTheme ?? view.fluentTheme)
+    }
+
     required init?(coder aDecoder: NSCoder) {
         preconditionFailure("init(coder:) has not been implemented")
     }
@@ -125,7 +137,7 @@ class ShyHeaderController: UIViewController {
 
         updatePadding()
         setupNotificationObservers()
-        updateNavigationBarStyle(theme: containingView?.fluentTheme ?? view.fluentTheme)
+        updateNavigationBarStyle(theme: msfNavigationController?.msfNavigationBar.tokenSet.fluentTheme ?? containingView?.fluentTheme ?? view.fluentTheme)
     }
 
     // MARK: - Base Construction
