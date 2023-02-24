@@ -127,8 +127,8 @@ class ShyHeaderController: UIViewController {
         setupNotificationObservers()
     }
 
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         updateNavigationBarStyle(theme: containingView?.fluentTheme ?? view.fluentTheme)
     }
 
