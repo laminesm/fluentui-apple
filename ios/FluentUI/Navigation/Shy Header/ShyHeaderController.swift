@@ -65,26 +65,16 @@ class ShyHeaderController: UIViewController {
     private var contentScrollViewObservation: NSKeyValueObservation?
     private var previousContentScrollViewTraits = ContentScrollViewTraits() //properties of the scroll view at the last scrollDidOccurIn: update. Used with current traits to understand user action
 
-    // The context of the parent controller used to pull the correct FluentTheme to update visuals
-    weak var containingView: UIView?
-
-    init(contentViewController: UIViewController, containingView: UIView?) {
+    init(contentViewController: UIViewController) {
         self.contentViewController = contentViewController
         shyHeaderView.accessoryView = contentViewController.navigationItem.accessoryView
         shyHeaderView.navigationBarShadow = contentViewController.navigationItem.navigationBarShadow
-
-        self.containingView = containingView
 
         super.init(nibName: nil, bundle: nil)
 
         shyHeaderView.maxHeightChanged = { [weak self] in
             self?.updatePadding()
         }
-
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(themeDidChange),
-                                               name: .didChangeTheme,
-                                               object: nil)
 
         loadViewIfNeeded()
         addChild(contentViewController)
@@ -112,13 +102,6 @@ class ShyHeaderController: UIViewController {
         }
     }
 
-    @objc private func themeDidChange(_ notification: Notification) {
-        guard let themeView = notification.object as? UIView, ((containingView?.isDescendant(of: themeView)) != nil) else {
-            return
-        }
-        //updateNavigationBarStyle(theme: containingView?.fluentTheme ?? view.fluentTheme)
-    }
-
     required init?(coder aDecoder: NSCoder) {
         preconditionFailure("init(coder:) has not been implemented")
     }
@@ -137,7 +120,11 @@ class ShyHeaderController: UIViewController {
 
         updatePadding()
         setupNotificationObservers()
-        if let theme: FluentTheme = msfNavigationController?.msfNavigationBar.tokenSet.fluentTheme {
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let theme = msfNavigationController?.msfNavigationBar.tokenSet.fluentTheme {
             updateNavigationBarStyle(theme: theme)
         }
     }
