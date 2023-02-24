@@ -82,11 +82,6 @@ class ShyHeaderController: UIViewController {
         contentViewController.didMove(toParent: self)
         contentViewController.view.fitIntoSuperview(usingConstraints: true)
 
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(themeDidChange),
-                                               name: .didChangeTheme,
-                                               object: nil)
-
         contentScrollViewObservation = contentViewController.navigationItem.observe(\.contentScrollView, options: [.new]) { [weak self] (_, change) in
             guard let strongSelf = self else {
                 return
@@ -105,13 +100,6 @@ class ShyHeaderController: UIViewController {
         accessoryViewObservation = contentViewController.navigationItem.observe(\UINavigationItem.accessoryView) { [weak self] item, _ in
             self?.shyHeaderView.accessoryView = item.accessoryView
         }
-    }
-
-    @objc private func themeDidChange(_ notification: Notification) {
-        guard let themeView = notification.object as? UIView, self.view.isDescendant(of: themeView), let theme = msfNavigationController?.msfNavigationBar.tokenSet.fluentTheme else {
-           return
-        }
-        updateNavigationBarStyle(theme: theme)
     }
 
     required init?(coder aDecoder: NSCoder) {

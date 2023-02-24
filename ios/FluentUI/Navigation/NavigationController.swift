@@ -77,6 +77,11 @@ open class NavigationController: UINavigationController {
             popGesture.addTarget(self, action: #selector(navigationPopScreenPanGestureRecognizerRecognized))
         }
 
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(themeDidChange),
+                                               name: .didChangeTheme,
+                                               object: nil)
+
         navigationBarStyleObservation = msfNavigationBar.observe(\.style) { [weak self] _, _ in
             self?.updateShyHeader()
         }
@@ -85,6 +90,13 @@ open class NavigationController: UINavigationController {
 
         // Allow subviews to display a custom background view
         view.subviews.forEach { $0.clipsToBounds = false }
+    }
+
+    @objc private func themeDidChange(_ notification: Notification) {
+        guard let themeView = notification.object as? UIView, self.view.isDescendant(of: themeView) else {
+           return
+        }
+        updateShyHeader()
     }
 
     open override func viewWillLayoutSubviews() {
