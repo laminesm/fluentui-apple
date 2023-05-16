@@ -170,8 +170,8 @@ class DemoController: UIViewController {
         let settingsButton = UIBarButtonItem(image: UIImage(named: "ic_fluent_settings_24_regular"),
                                              style: .plain,
                                              target: self,
-                                             action: #selector(showAppearancePopover))
-        let readmeButton = UIBarButtonItem(image: UIImage(systemName: "i.circle.fill"),
+                                             action: #selector(showAppearancePopover(_:)))
+        let readmeButton = UIBarButtonItem(image: UIImage(systemName: "info.circle.fill"),
                                            style: .plain,
                                            target: self,
                                            action: #selector(showReadmePopover))
