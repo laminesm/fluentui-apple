@@ -110,14 +110,6 @@ class DemoController: UIViewController {
 
     }
 
-    func createLabelAndSwitchRow(labelText: String, switchAction: Selector, isOn: Bool = false) -> UIView {
-        let switchView = UISwitch()
-        switchView.isOn = isOn
-        switchView.addTarget(self, action: switchAction, for: .valueChanged)
-
-        return createLabelAndViewsRow(labelText: labelText, views: [switchView])
-    }
-
     func createLabelAndViewsRow(labelText: String, views: [UIView]) -> UIView {
         let stackView = UIStackView(frame: .zero)
         stackView.axis = .horizontal
@@ -170,8 +162,8 @@ class DemoController: UIViewController {
         let settingsButton = UIBarButtonItem(image: UIImage(named: "ic_fluent_settings_24_regular"),
                                              style: .plain,
                                              target: self,
-                                             action: #selector(showAppearancePopover))
-        let readmeButton = UIBarButtonItem(image: UIImage(systemName: "i.circle.fill"),
+                                             action: #selector(showAppearancePopover(_:)))
+        let readmeButton = UIBarButtonItem(image: UIImage(systemName: "info.circle.fill"),
                                            style: .plain,
                                            target: self,
                                            action: #selector(showReadmePopover))
@@ -184,10 +176,19 @@ class DemoController: UIViewController {
         self.present(readmeViewController, animated: true, completion: nil)
     }
 
-    @objc func showAppearancePopover(_ sender: UIBarButtonItem) {
-        appearanceController.popoverPresentationController?.barButtonItem = sender
+    @objc func showAppearancePopover(_ sender: AnyObject, presenter: UIViewController) {
+        if let barButtonItem = sender as? UIBarButtonItem {
+            appearanceController.popoverPresentationController?.barButtonItem = barButtonItem
+        } else if let sourceView = sender as? UIView {
+            appearanceController.popoverPresentationController?.sourceView = sourceView
+            appearanceController.popoverPresentationController?.sourceRect = sourceView.bounds
+        }
         appearanceController.popoverPresentationController?.delegate = self
-        self.present(appearanceController, animated: true, completion: nil)
+        presenter.present(appearanceController, animated: true, completion: nil)
+    }
+
+    @objc func showAppearancePopover(_ sender: AnyObject) {
+        showAppearancePopover(sender, presenter: self)
     }
 
     var readmeString: String?
