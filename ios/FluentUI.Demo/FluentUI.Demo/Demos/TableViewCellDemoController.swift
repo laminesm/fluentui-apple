@@ -189,10 +189,13 @@ extension TableViewCellDemoController {
         }
 
         let showsLabelAccessoryView = TableViewCellSampleData.hasLabelAccessoryViews(at: indexPath)
+        let badge = BadgeView(dataSource: BadgeViewDataSource(text: "Badge"))
+        let stackView = UIStackView(frame: CGRect(x: 0, y: 0, width: 60, height: 25))
+        stackView.addArrangedSubview(badge)
 
         cell.isUnreadDotVisible = section.isUnreadDotVisible
         cell.titleLeadingAccessoryView = showsLabelAccessoryView ? item.text1LeadingAccessoryView() : nil
-        cell.titleTrailingAccessoryView = showsLabelAccessoryView ? item.text1TrailingAccessoryView() : nil
+        cell.titleTrailingAccessoryView = stackView
         cell.subtitleLeadingAccessoryView = showsLabelAccessoryView ? item.text2LeadingAccessoryView() : nil
         cell.subtitleTrailingAccessoryView = showsLabelAccessoryView ? item.text2TrailingAccessoryView() : nil
         cell.footerLeadingAccessoryView = showsLabelAccessoryView ? item.text3LeadingAccessoryView() : nil
