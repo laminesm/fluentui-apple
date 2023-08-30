@@ -317,7 +317,7 @@ open class NavigationBar: UINavigationBar, TokenizedControlInternal, TwoLineTitl
     private var topAccessoryView: UIView?
     private var topAccessoryViewConstraints: [NSLayoutConstraint] = []
 
-    private var titleViewConstraint: NSLayoutConstraint?
+    private var titleViewConstraint: [NSLayoutConstraint]?
 
     private(set) var usesLeadingTitle: Bool = true {
         didSet {
@@ -872,18 +872,25 @@ open class NavigationBar: UINavigationBar, TokenizedControlInternal, TwoLineTitl
     }
 
     private func updateFakeCenterTitleConstraints() {
-        titleViewConstraint?.isActive = false
-
-        let newTitleViewConstraint: NSLayoutConstraint
-        if !usesLeadingTitle && systemWantsCompactNavigationBar {
-            // If we're drawing our own system-style bar above the OS bar, align our title with the OS's
-            newTitleViewConstraint = titleView.centerXAnchor.constraint(equalTo: centerXAnchor)
-        } else {
-            // Otherwise, keep `self.titleView` leading-justified
-            newTitleViewConstraint = preTitleSpacerView.widthAnchor.constraint(equalToConstant: 0)
+        if var titleViewConstraint = titleViewConstraint {
+            NSLayoutConstraint.deactivate(titleViewConstraint)
+            titleViewConstraint.removeAll()
         }
-        titleViewConstraint = newTitleViewConstraint
-        newTitleViewConstraint.isActive = true
+
+//        let newTitleViewConstraint: NSLayoutConstraint
+//        if !usesLeadingTitle && systemWantsCompactNavigationBar {
+//            // If we're drawing our own system-style bar above the OS bar, align our title with the OS's
+//            newTitleViewConstraint = titleView.centerXAnchor.constraint(equalTo: centerXAnchor)
+//        } else {
+//            // Otherwise, keep `self.titleView` leading-justified
+//            newTitleViewConstraint = preTitleSpacerView.widthAnchor.constraint(equalToConstant: 0)
+//        }
+//        titleViewConstraint = newTitleViewConstraint
+        titleViewConstraint = [
+            titleView.topAnchor.constraint(equalTo: backgroundView.topAnchor),
+            titleView.bottomAnchor.constraint(equalTo: backgroundView.bottomAnchor)
+            ]
+        NSLayoutConstraint.activate(titleViewConstraint!)
     }
 
     private func updateShadow(for navigationItem: UINavigationItem?) {
